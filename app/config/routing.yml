@@ -1,0 +1,5 @@
+flatting_site:
+    resource: "@FlattingSiteBundle/Controller/"
+    type:     annotation
+    prefix:   /
+

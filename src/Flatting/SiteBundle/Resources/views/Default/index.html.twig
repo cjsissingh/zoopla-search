@@ -1,0 +1,32 @@
+{% extends '::base.html.twig' %}
+
+{% block body %}
+<table class="table-striped">
+    <tr>
+        <th></th>
+        <th>Title</th>
+        {# <th>Description</th> #}
+        <th>Average Price Per Room</th>
+        <th>Dates</th>
+    </tr>
+    {% for listing in listings %}
+    {% set rooms = listing.num_bedrooms %}
+        <tr>
+            <td><img src="{{ listing.image_url }}"></td>
+            <td>
+                <a href="{{ listing.details_url }}" target="_blank">
+                {% if listing.short_description %}{{ listing.short_description|raw }}{% else %}{{listing.displayable_address}}{% endif %}
+                </a>
+            </td>
+            {# <td>{{ listing.description }}</td> #}
+            <td>
+                <ul>
+                    <li>£{{ (listing.rental_prices.per_week / rooms)|number_format(2, '.', ',') }}pw
+                    <li>£{{ (listing.rental_prices.per_month / rooms)|number_format(2, '.', ',') }}pcm
+                </ul>
+            </td>
+            <td>{{ listing.first_published_date|date() }} / {{ listing.last_published_date|date() }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}
