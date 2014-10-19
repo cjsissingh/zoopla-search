@@ -1,0 +1,4 @@
+services:
+    flatting.zoopla.search_provider:
+        class: Flatting\ZooplaBundle\Provider\SearchProvider
+

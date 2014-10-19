@@ -19,6 +19,7 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(),
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
             new Flatting\SiteBundle\FlattingSiteBundle(),
+            new Flatting\ZooplaBundle\FlattingZooplaBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
