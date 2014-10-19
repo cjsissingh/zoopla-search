@@ -2,18 +2,26 @@
 
 namespace Flatting\ZooplaBundle\Provider;
 
+use Symfony\Component\HttpFoundation\ParameterBag;
+
 use Guzzle\Http\Client;
 
 class SearchProvider
 {
 
     private $listings = array();
+    private $ignoredKeys = array(
+                'minimum_beds',
+                'maximum_beds',
+                'minimum_price',
+                'maximum_price'
+            );
 
     /**
      * @Route("/search")
      * @Template()
      */
-    public function search()
+    public function search(ParameterBag $query)
     {
         //?postcode=E1+5LJ&listing_status=rent&maximum_price=1000&minimum_beds=3&radius=2&api_key=hu29vtwe48srv5czujdp5cee
         $client = new Client('http://api.zoopla.co.uk');
@@ -21,53 +29,25 @@ class SearchProvider
         $request = $client->get('/api/v1/property_listings.js');
         $requestQuery = $request->getQuery();
         $requestQuery->set('api_key', 'hu29vtwe48srv5czujdp5cee');
-        $requestQuery->set('postcode', 'E1+5LJ');
-        $requestQuery->set('listing_status', 'rent');
-        $requestQuery->set('radius', '1.5');
-        $requestQuery->set('order_by', 'age');
-        $requestQuery->set('furnished', 'furnished');
 
-        $requestQuery->set('maximum_price', '600');
-        $requestQuery->set('minimum_beds', '3');
-        $requestQuery->set('maximum_beds', '3');
+        foreach($query->all() as $key => $value){
+            if(!in_array($key, $this->ignoredKeys)){
+                $requestQuery->set($key, $value);
+            }
+        }
 
-        $response = $request->send();
+        for($i = $query->get('minimum_beds'); $i <= $query->get('maximum_beds'); $i++){
+            $requestQuery->set('maximum_price', $query->get('appr') * $i);
+            $requestQuery->set('minimum_beds', $i);
+            $requestQuery->set('maximum_beds', $i);
 
-        $data = $response->json();
+            $response = $request->send();
 
-        $this->processListings($data);
+            $data = $response->json();
 
-        $requestQuery->set('maximum_price', '800');
-        $requestQuery->set('minimum_beds', '4');
-        $requestQuery->set('maximum_beds', '4');
+            $this->processListings($data);
 
-        $response = $request->send();
-
-        $data = $response->json();
-
-        $this->processListings($data);
-
-
-
-        $requestQuery->set('maximum_price', '1000');
-        $requestQuery->set('maximum_beds', '5');
-        $requestQuery->set('minimum_beds', '5');
-
-        $response = $request->send();
-
-        $data = $response->json();
-
-        $this->processListings($data);
-
-        $requestQuery->set('maximum_price', '1200');
-        $requestQuery->set('maximum_beds', '6');
-        $requestQuery->set('minimum_beds', '6');
-
-        $response = $request->send();
-
-        $data = $response->json();
-
-        $this->processListings($data);
+        }
 
         usort($this->listings, function($a, $b){
             $aDate = new \DateTime($a['first_published_date']);
